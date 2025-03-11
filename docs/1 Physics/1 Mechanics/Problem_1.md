@@ -310,6 +310,13 @@ if __name__ == "__main__":
     # anim = animate_trajectory(v0=20, theta=45)
 ```
 
+## Results
+![Figure 1: Projectile Motion Analysis](images/Figure_1.png)
+![Figure 2: Projectile Motion Analysis](images/Figure_2.png)
+![Figure 3: Projectile Motion Analysis](images/Figure_3.png)
+![Figure 4: Projectile Motion Analysis](images/Figure_4.png)
+
+
 ## Results and Discussion
 
 When we run the above code, we generate several visualizations that provide insights into projectile motion:
