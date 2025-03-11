@@ -17,7 +17,9 @@ The horizontal and vertical components of motion can be treated independently:
 $$a_x = 0$$
 
 Therefore:
+
 $$v_x = v_{0x} = v_0 \cos{\theta} \quad \text{(constant)}$$
+
 $$x(t) = x_0 + v_{0x} \cdot t = x_0 + v_0 \cos{\theta} \cdot t$$
 
 **Vertical motion**: Under gravitational acceleration $g$ (positive downward):
