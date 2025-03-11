@@ -361,5 +361,5 @@ The computational approach allows us to visualize these relationships and explor
 1. Halliday, D., Resnick, R., & Walker, J. (2013). Fundamentals of Physics. John Wiley & Sons.
 2. Taylor, J. R. (2005). Classical Mechanics. University Science Books.
 3. Young, H. D., & Freedman, R. A. (2012). University Physics with Modern Physics. Pearson.
-</rewritten_file>
+
 
