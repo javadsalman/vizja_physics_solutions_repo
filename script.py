@@ -1,112 +1,146 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from IPython.display import HTML
 
 # Constants
-G = 6.67430e-11  # Gravitational constant (m^3 kg^-1 s^-2)
-M = 1.989e30     # Mass of the Sun (kg)
+G = 6.67430e-11  # Gravitational constant (m³/kg·s²)
 
-# Function to calculate orbital period based on Kepler's Third Law
-def calculate_period(radius):
-    return 2 * np.pi * np.sqrt(radius**3 / (G * M))
+# Celestial body data
+bodies = {
+    'Earth': {
+        'mass': 5.972e24,  # kg
+        'radius': 6.371e6,  # m
+        'color': 'blue',
+        'orbit_velocity': 29.78e3  # m/s
+    },
+    'Mars': {
+        'mass': 6.39e23,
+        'radius': 3.389e6,
+        'color': 'red',
+        'orbit_velocity': 24.077e3
+    },
+    'Jupiter': {
+        'mass': 1.898e27,
+        'radius': 6.9911e7,
+        'color': 'orange',
+        'orbit_velocity': 13.07e3
+    }
+}
 
-# Function to generate orbit points
-def generate_orbit(radius, num_points=1000):
-    theta = np.linspace(0, 2*np.pi, num_points)
-    x = radius * np.cos(theta)
-    y = radius * np.sin(theta)
-    return x, y
+def calculate_cosmic_velocities(mass, radius, orbit_velocity, altitudes):
+    """Calculate cosmic velocities at different altitudes."""
+    v1 = np.sqrt(G * mass / (radius + altitudes))  # First cosmic velocity
+    v2 = v1 * np.sqrt(2)  # Second cosmic velocity
+    v3 = np.sqrt(v2**2 + orbit_velocity**2)  # Third cosmic velocity
+    return v1, v2, v3
 
-# Verify Kepler's Third Law for various radii
-radii = np.linspace(0.5e11, 5.0e11, 20)  # Different orbital radii in meters
-periods = [calculate_period(r) for r in radii]
-periods_squared = [p**2 for p in periods]
-radii_cubed = [r**3 for r in radii]
+# Generate altitude points (0 to 1000 km)
+altitudes = np.linspace(0, 1000000, 1000)
 
 # Create plots
-plt.figure(figsize=(16, 8))
+plt.figure(figsize=(15, 10))
 
-# Plot 1: Orbital paths for different radii
+# Plot 1: Cosmic velocities vs altitude for each body
 plt.subplot(1, 2, 1)
-for r in [0.5e11, 1.0e11, 2.0e11, 3.0e11]:
-    x, y = generate_orbit(r)
-    plt.plot(x, y)
-plt.scatter(0, 0, color='yellow', s=200, label='Sun')
-plt.axis('equal')
-plt.grid(True)
-plt.xlabel('X (m)')
-plt.ylabel('Y (m)')
-plt.title('Circular Orbits at Different Radii')
-plt.legend(['0.5 AU', '1.0 AU', '2.0 AU', '3.0 AU', 'Sun'])
+for body, data in bodies.items():
+    v1, v2, v3 = calculate_cosmic_velocities(
+        data['mass'], data['radius'], data['orbit_velocity'], altitudes
+    )
+    
+    plt.plot(altitudes/1000, v1/1000, '--', 
+             color=data['color'], label=f'{body} (v₁)')
+    plt.plot(altitudes/1000, v2/1000, '-', 
+             color=data['color'], label=f'{body} (v₂)')
 
-# Plot 2: T^2 vs r^3 (Kepler's Third Law)
-plt.subplot(1, 2, 2)
-plt.scatter(radii_cubed, periods_squared, color='blue')
-plt.plot(radii_cubed, [(4*np.pi**2/(G*M))*r3 for r3 in radii_cubed], 'r--')
-plt.xlabel('Radius Cubed (m³)')
-plt.ylabel('Period Squared (s²)')
-plt.title('Kepler\'s Third Law: T² ∝ r³')
+plt.xlabel('Altitude (km)')
+plt.ylabel('Velocity (km/s)')
+plt.title('Cosmic Velocities vs Altitude')
 plt.grid(True)
-plt.legend(['Data Points', 'Theoretical Line'])
+plt.legend()
+
+# Plot 2: Comparison of escape velocities at surface
+plt.subplot(1, 2, 2)
+bodies_list = list(bodies.keys())
+v1_surface = []
+v2_surface = []
+v3_surface = []
+
+for body, data in bodies.items():
+    v1, v2, v3 = calculate_cosmic_velocities(
+        data['mass'], data['radius'], data['orbit_velocity'], np.array([0])
+    )
+    v1_surface.append(v1[0]/1000)
+    v2_surface.append(v2[0]/1000)
+    v3_surface.append(v3[0]/1000)
+
+x = np.arange(len(bodies_list))
+width = 0.25
+
+plt.bar(x - width, v1_surface, width, label='First Cosmic Velocity',
+        color=['blue', 'red', 'orange'], alpha=0.5)
+plt.bar(x, v2_surface, width, label='Second Cosmic Velocity',
+        color=['blue', 'red', 'orange'], alpha=0.7)
+plt.bar(x + width, v3_surface, width, label='Third Cosmic Velocity',
+        color=['blue', 'red', 'orange'], alpha=0.9)
+
+plt.xlabel('Celestial Body')
+plt.ylabel('Velocity (km/s)')
+plt.title('Comparison of Cosmic Velocities at Surface')
+plt.xticks(x, bodies_list)
+plt.legend()
+plt.grid(True)
 
 plt.tight_layout()
-plt.savefig('keplers_third_law.png')
+plt.savefig('cosmic_velocities.png')
 plt.show()
 
-# Animation of orbital motion
-def animate_orbits():
-    fig, ax = plt.subplots(figsize=(10, 10))
-    ax.set_aspect('equal')
-    ax.grid(True)
+# Create 3D visualization of escape trajectories
+def plot_escape_trajectories():
+    fig = plt.figure(figsize=(12, 12))
+    ax = fig.add_subplot(111, projection='3d')
     
-    # Define planets with different radii
-    planets = [
-        {"radius": 0.5e11, "color": "gray", "size": 10},    # Mercury-like
-        {"radius": 1.0e11, "color": "blue", "size": 20},    # Earth-like
-        {"radius": 1.5e11, "color": "red", "size": 15},     # Mars-like
-        {"radius": 2.5e11, "color": "orange", "size": 30}   # Jupiter-like
-    ]
+    # Time points
+    t = np.linspace(0, 10, 1000)
     
-    # Calculate periods
-    for planet in planets:
-        planet["period"] = calculate_period(planet["radius"])
-        planet["point"], = ax.plot([], [], 'o', color=planet["color"], 
-                                   markersize=planet["size"])
-        planet["orbit"], = ax.plot([], [], '-', color=planet["color"], alpha=0.3)
-        x, y = generate_orbit(planet["radius"])
-        planet["orbit_x"] = x
-        planet["orbit_y"] = y
-    
-    # Plot Sun
-    sun = plt.Circle((0, 0), 0.1e11, color='yellow')
-    ax.add_patch(sun)
-    
-    # Set limits
-    ax.set_xlim(-3e11, 3e11)
-    ax.set_ylim(-3e11, 3e11)
-    ax.set_xlabel('X (m)')
-    ax.set_ylabel('Y (m)')
-    ax.set_title('Planet Orbits Following Kepler\'s Third Law')
-    
-    def init():
-        for planet in planets:
-            planet["point"].set_data([], [])
-            planet["orbit"].set_data([], [])
-        return [planet["point"] for planet in planets] + [planet["orbit"] for planet in planets]
-    
-    def animate(i):
-        # Update each planet position
-        for planet in planets:
-            # Different angular velocity based on period
-            angle = (i * 2 * np.pi / 100) % (2 * np.pi)
-            x = planet["radius"] * np.cos(angle * 365 / planet["period"])
-            y = planet["radius"] * np.sin(angle * 365 / planet["period"])
-            planet["point"].set_data(x, y)
-            planet["orbit"].set_data(planet["orbit_x"], planet["orbit_y"])
+    for body, data in bodies.items():
+        # Surface escape velocity
+        v2 = np.sqrt(2 * G * data['mass'] / data['radius'])
         
-        return [planet["point"] for planet in planets] + [planet["orbit"] for planet in planets]
+        # Plot different escape trajectories
+        for angle in [30, 45, 60]:
+            # Convert angle to radians
+            theta = np.radians(angle)
+            
+            # Initial velocities
+            vx = v2 * np.cos(theta)
+            vy = v2 * np.sin(theta)
+            
+            # Calculate positions
+            x = vx * t
+            y = vy * t - 0.5 * G * data['mass'] / data['radius']**2 * t**2
+            z = np.zeros_like(t)
+            
+            # Plot trajectory
+            ax.plot(x/1e6, y/1e6, z, 
+                   label=f'{body} ({angle}°)', 
+                   color=data['color'], 
+                   alpha=0.6)
     
-    ani = FuncAnimation(fig, animate, frames=100, init_func=init, blit=True)
-    plt.close()  # Prevent display of the static plot
-    return HTML(ani.to_jshtml())
+    # Plot celestial bodies
+    for body, data in bodies.items():
+        u = np.linspace(0, 2 * np.pi, 100)
+        v = np.linspace(0, np.pi, 100)
+        x = data['radius'] * np.outer(np.cos(u), np.sin(v)) / 1e6
+        y = data['radius'] * np.outer(np.sin(u), np.sin(v)) / 1e6
+        z = data['radius'] * np.outer(np.ones(np.size(u)), np.cos(v)) / 1e6
+        ax.plot_surface(x, y, z, color=data['color'], alpha=0.2)
+    
+    ax.set_xlabel('X (1000 km)')
+    ax.set_ylabel('Y (1000 km)')
+    ax.set_zlabel('Z (1000 km)')
+    ax.set_title('Escape Trajectories from Different Celestial Bodies')
+    plt.legend()
+    plt.savefig('escape_trajectories.png')
+    plt.show()
+
+# Generate 3D visualization
+plot_escape_trajectories()
