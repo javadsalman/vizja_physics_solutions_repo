@@ -88,7 +88,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../Problem_2/">Problem 2</a>
+<li class="toctree-l2"><a class="reference internal" href="../Problem_2/">Problem 2: Investigating the Dynamics of a Forced Damped Pendulum</a>
 </li>
 </ul>
 </li>
@@ -192,14 +192,14 @@
 <div class="arithmatex">\[x(t) = x_0 + v_{0x} \cdot t = x_0 + v_0 \cos{\theta} \cdot t\]</div>
 <p><strong>Vertical motion</strong>: Under gravitational acceleration <span class="arithmatex">\(g\)</span> (positive downward):
 <span class="arithmatex">\(<span class="arithmatex">\(a_y = g\)</span>\)</span></p>
-<p>Therefore:
-<span class="arithmatex">\(<span class="arithmatex">\(v_y(t) = v_{0y} - g \cdot t = v_0 \sin{\theta} - g \cdot t\)</span>\)</span>
-<span class="arithmatex">\(<span class="arithmatex">\(y(t) = y_0 + v_{0y} \cdot t - \frac{1}{2} g \cdot t^2 = y_0 + v_0 \sin{\theta} \cdot t - \frac{1}{2} g \cdot t^2\)</span>\)</span></p>
+<p>Therefore:</p>
+<div class="arithmatex">\[v_y(t) = v_{0y} - g \cdot t = v_0 \sin{\theta} - g \cdot t\]</div>
+<div class="arithmatex">\[y(t) = y_0 + v_{0y} \cdot t - \frac{1}{2} g \cdot t^2 = y_0 + v_0 \sin{\theta} \cdot t - \frac{1}{2} g \cdot t^2\]</div>
 <p>These equations represent a family of solutions depending on the initial conditions: <span class="arithmatex">\(v_0\)</span>, <span class="arithmatex">\(\theta\)</span>, <span class="arithmatex">\(x_0\)</span>, and <span class="arithmatex">\(y_0\)</span>.</p>
 <h3 id="the-range-equation">The Range Equation</h3>
 <p>The range <span class="arithmatex">\(R\)</span> is the horizontal distance traveled when the projectile returns to its initial height. To find it, we need to determine the time of flight <span class="arithmatex">\(T\)</span> and then calculate the horizontal distance covered during this time.</p>
-<p>First, assuming the projectile returns to its initial height (<span class="arithmatex">\(y = y_0\)</span>), we solve:
-<span class="arithmatex">\(<span class="arithmatex">\(y_0 = y_0 + v_0 \sin{\theta} \cdot T - \frac{1}{2} g \cdot T^2\)</span>\)</span></p>
+<p>First, assuming the projectile returns to its initial height (<span class="arithmatex">\(y = y_0\)</span>), we solve:</p>
+<div class="arithmatex">\[y_0 = y_0 + v_0 \sin{\theta} \cdot T - \frac{1}{2} g \cdot T^2\]</div>
 <p>Which simplifies to:
 <span class="arithmatex">\(<span class="arithmatex">\(v_0 \sin{\theta} \cdot T - \frac{1}{2} g \cdot T^2 = 0\)</span>\)</span></p>
 <p>Factoring out <span class="arithmatex">\(T\)</span>:
@@ -527,7 +527,7 @@ if __name__ == "__main__":
 </div><footer>
 <div aria-label="Footer Navigation" class="rst-footer-buttons" role="navigation">
 <a class="btn btn-neutral float-left" href="../../.." title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-<a class="btn btn-neutral float-right" href="../Problem_2/" title="Problem 2">Next <span class="icon icon-circle-arrow-right"></span></a>
+<a class="btn btn-neutral float-right" href="../Problem_2/" title="Problem 2: Investigating the Dynamics of a Forced Damped Pendulum">Next <span class="icon icon-circle-arrow-right"></span></a>
 </div>
 <hr/>
 <div role="contentinfo">
