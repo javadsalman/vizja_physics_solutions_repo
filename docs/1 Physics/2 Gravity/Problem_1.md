@@ -59,9 +59,9 @@ With $G = 6.67430 \times 10^{-11} \text{ m}^3 \text{ kg}^{-1} \text{ s}^{-2}$, t
 
 ### Solar System
 
-For planets in our solar system, the relationship T^2 ∝ r^3 holds remarkably well:
+For planets in our solar system, the relationship $T^2 \propto r^3$ holds remarkably well, as shown in the table below:
 
-| Planet   | Semi-major axis (AU) | Orbital Period (years) | T^2/r^3 (constant) |
+| Planet   | Semi-major axis (AU) | Orbital Period (years) | $T^2 \propto r^3$ (constant) |
 |----------|----------------------|------------------------|---------------------|
 | Mercury  | 0.39                 | 0.24                   | 1.00                |
 | Venus    | 0.72                 | 0.62                   | 1.00                |
