@@ -26,7 +26,9 @@ $$x(t) = x_0 + v_{0x} \cdot t = x_0 + v_0 \cos{\theta} \cdot t$$
 $$a_y = g$$
 
 Therefore:
+
 $$v_y(t) = v_{0y} - g \cdot t = v_0 \sin{\theta} - g \cdot t$$
+
 $$y(t) = y_0 + v_{0y} \cdot t - \frac{1}{2} g \cdot t^2 = y_0 + v_0 \sin{\theta} \cdot t - \frac{1}{2} g \cdot t^2$$
 
 These equations represent a family of solutions depending on the initial conditions: $v_0$, $\theta$, $x_0$, and $y_0$.
@@ -36,6 +38,7 @@ These equations represent a family of solutions depending on the initial conditi
 The range $R$ is the horizontal distance traveled when the projectile returns to its initial height. To find it, we need to determine the time of flight $T$ and then calculate the horizontal distance covered during this time.
 
 First, assuming the projectile returns to its initial height ($y = y_0$), we solve:
+
 $$y_0 = y_0 + v_0 \sin{\theta} \cdot T - \frac{1}{2} g \cdot T^2$$
 
 Which simplifies to:

@@ -1,183 +1,240 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D
 
-def calculate_trajectory(v0, theta_deg, h0=0, g=9.8, dt=0.01):
+def pendulum_ode(t, y, b, g, L, A, omega):
     """
-    Calculate the trajectory of a projectile.
-    
-    Parameters:
-    - v0: initial velocity (m/s)
-    - theta_deg: launch angle (degrees)
-    - h0: initial height (m)
-    - g: gravitational acceleration (m/s²)
-    - dt: time step for simulation (s)
-    
-    Returns:
-    - x, y: position coordinates arrays
-    - t: time array
+    Define the ODE system for a forced damped pendulum
+    y[0] = theta, y[1] = dtheta/dt
     """
-    # Convert angle to radians
-    theta = np.radians(theta_deg)
-    
-    # Initial velocities
-    v0x = v0 * np.cos(theta)
-    v0y = v0 * np.sin(theta)
-    
-    # Calculate time of flight (using quadratic formula)
-    # For y(t) = h0 + v0y*t - 0.5*g*t² = 0
-    if v0y**2 + 2*g*h0 < 0:  # No real solutions (doesn't reach ground)
-        return None, None, None
-    
-    t_flight = (v0y + np.sqrt(v0y**2 + 2*g*h0)) / g
-    
-    # Create time array
-    t = np.arange(0, t_flight, dt)
-    
-    # Calculate position at each time step
-    x = v0x * t
-    y = h0 + v0y * t - 0.5 * g * t**2
-    
-    # Add the landing point precisely
-    t_landing = (v0y + np.sqrt(v0y**2 + 2*g*h0)) / g
-    if t[-1] < t_landing:
-        t = np.append(t, t_landing)
-        x = np.append(x, v0x * t_landing)
-        y = np.append(y, 0)  # Landing at y=0
-    
-    return x, y, t
+    return [
+        y[1],
+        -b * y[1] - (g/L) * np.sin(y[0]) + A * np.cos(omega * t)
+    ]
 
-def calculate_range(v0, theta_deg, h0=0, g=9.8):
-    """Calculate the range of a projectile analytically."""
-    theta = np.radians(theta_deg)
-    if h0 == 0:
-        # Simple case: launch and landing at same height
-        return (v0**2 * np.sin(2*theta)) / g
-    else:
-        # Launch from height h0
-        return v0 * np.cos(theta) * (v0 * np.sin(theta) + 
-                                    np.sqrt((v0 * np.sin(theta))**2 + 2*g*h0)) / g
+def simulate_pendulum(tspan, y0, b, g, L, A, omega):
+    """
+    Simulate the pendulum motion over a time span
+    """
+    sol = solve_ivp(
+        lambda t, y: pendulum_ode(t, y, b, g, L, A, omega),
+        [tspan[0], tspan[-1]],
+        y0,
+        t_eval=tspan,
+        method='RK45',
+        rtol=1e-6,
+        atol=1e-9
+    )
+    return sol.t, sol.y[0], sol.y[1]
 
-def plot_trajectories(v0=20, h0=0, g=9.8):
-    """Plot multiple trajectories for different launch angles."""
-    angles = np.arange(10, 91, 10)  # 10° to 90° in steps of 10°
+def plot_time_series(t, theta, omega, title="Pendulum Motion"):
+    """
+    Plot the time series of the pendulum angle
+    """
     plt.figure(figsize=(10, 6))
-    
-    max_range = 0
-    max_height = 0
-    
-    for theta in angles:
-        x, y, _ = calculate_trajectory(v0, theta, h0, g)
-        if x is not None and y is not None:
-            plt.plot(x, y, label=f'θ = {theta}°')
-            max_range = max(max_range, x[-1])
-            max_height = max(max_height, np.max(y))
-    
+    plt.plot(t, theta)
+    plt.xlabel('Time (s)')
+    plt.ylabel('Angle (rad)')
+    plt.title(title)
     plt.grid(True)
-    plt.axhline(y=0, color='k', linestyle='-', alpha=0.3)
-    plt.axvline(x=0, color='k', linestyle='-', alpha=0.3)
-    plt.xlabel('Horizontal Distance (m)')
-    plt.ylabel('Height (m)')
-    plt.title(f'Projectile Trajectories for Different Launch Angles (v₀ = {v0} m/s)')
-    plt.legend()
-    plt.axis([0, max_range*1.1, 0, max_height*1.1])
+    plt.savefig(f'pendulum_timeseries_omega_{omega:.2f}.png', dpi=300)
     plt.show()
 
-def plot_range_vs_angle(v0=20, h0=0, g=9.8):
-    """Plot the range as a function of launch angle."""
-    angles = np.linspace(0, 90, 91)  # 0° to 90° in steps of 1°
-    ranges = [calculate_range(v0, theta, h0, g) for theta in angles]
+def plot_phase_portrait(theta, omega_values, title="Phase Portrait"):
+    """
+    Plot the phase portrait (theta vs. dtheta/dt)
+    """
+    plt.figure(figsize=(10, 8))
+    for i, omega in enumerate(omega_values):
+        plt.plot(theta[i], omega[i], label=f'ω = {omega:.2f} rad/s')
     
-    plt.figure(figsize=(10, 6))
-    plt.plot(angles, ranges)
+    plt.xlabel('θ (rad)')
+    plt.ylabel('dθ/dt (rad/s)')
+    plt.title(title)
     plt.grid(True)
-    plt.xlabel('Launch Angle (degrees)')
-    plt.ylabel('Range (m)')
-    plt.title(f'Range vs. Launch Angle (v₀ = {v0} m/s, h₀ = {h0} m)')
-    
-    # Find and mark the maximum range
-    max_range_idx = np.argmax(ranges)
-    max_range_angle = angles[max_range_idx]
-    max_range_value = ranges[max_range_idx]
-    
-    plt.scatter(max_range_angle, max_range_value, color='red', s=100, 
-                label=f'Maximum Range: {max_range_value:.1f} m at θ = {max_range_angle}°')
     plt.legend()
+    plt.savefig('pendulum_phase_portrait.png', dpi=300)
     plt.show()
 
-def animate_trajectory(v0=20, theta=45, h0=0, g=9.8):
-    """Create an animation of the projectile motion."""
-    x, y, t = calculate_trajectory(v0, theta, h0, g)
+def create_poincare_section(t, theta, dtheta, omega, driving_period):
+    """
+    Create a Poincaré section by sampling the phase space 
+    at times that are multiples of the driving period
+    """
+    # Find indices where time is approximately a multiple of the driving period
+    indices = []
+    period = 2 * np.pi / omega
+    for i in range(len(t)):
+        if abs(t[i] % period) < 1e-10 or abs(t[i] % period - period) < 1e-10:
+            indices.append(i)
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.set_xlim(0, max(x) * 1.1)
-    ax.set_ylim(0, max(y) * 1.1)
+    return theta[indices], dtheta[indices]
+
+def plot_poincare_section(theta_values, dtheta_values, omega_values):
+    """
+    Plot Poincaré sections for different parameter values
+    """
+    plt.figure(figsize=(12, 10))
+    for i, omega in enumerate(omega_values):
+        plt.scatter(theta_values[i], dtheta_values[i], s=5, 
+                    label=f'ω = {omega:.2f} rad/s')
+    
+    plt.xlabel('θ (rad)')
+    plt.ylabel('dθ/dt (rad/s)')
+    plt.title('Poincaré Section')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('pendulum_poincare_section.png', dpi=300)
+    plt.show()
+
+def create_bifurcation_diagram(A_values, omega, b, g, L):
+    """
+    Create a bifurcation diagram by varying the driving amplitude
+    """
+    theta_values = []
+    
+    # Time settings for simulation
+    tmax = 200  # Simulate for a long time to reach steady state
+    transient = 100  # Discard the first transient seconds
+    t = np.linspace(0, tmax, 10000)
+    
+    for A in A_values:
+        # Simulate with current parameter values
+        _, theta, _ = simulate_pendulum(t, [0.1, 0], b, g, L, A, omega)
+        
+        # Find indices for the steady state (after transient)
+        steady_idx = t > transient
+        t_steady = t[steady_idx]
+        theta_steady = theta[steady_idx]
+        
+        # Sample at the driving period (stroboscopic sampling)
+        driving_period = 2 * np.pi / omega
+        sample_indices = []
+        
+        for i in range(len(t_steady)):
+            if abs((t_steady[i] % driving_period) - driving_period) < 1e-2 or abs(t_steady[i] % driving_period) < 1e-2:
+                sample_indices.append(i)
+        
+        # Append sampled theta values to the list
+        theta_values.append(theta_steady[sample_indices])
+    
+    return A_values, theta_values
+
+def plot_bifurcation_diagram(A_values, theta_values):
+    """
+    Plot the bifurcation diagram
+    """
+    plt.figure(figsize=(12, 8))
+    
+    for i, A in enumerate(A_values):
+        # Create vertical scatter plot for each A value
+        y = theta_values[i]
+        x = np.full_like(y, A)
+        plt.scatter(x, y, s=0.5, c='black', alpha=0.5)
+    
+    plt.xlabel('Driving Amplitude (A)')
+    plt.ylabel('θ (rad)')
+    plt.title('Bifurcation Diagram')
+    plt.grid(True)
+    plt.savefig('pendulum_bifurcation_diagram.png', dpi=300)
+    plt.show()
+
+def animate_pendulum(t, theta, L=1.0, fps=30):
+    """
+    Create an animation of the pendulum motion
+    """
+    # Set up the figure and axis
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_xlim(-1.5*L, 1.5*L)
+    ax.set_ylim(-1.5*L, 1.5*L)
+    ax.set_aspect('equal')
     ax.grid(True)
-    ax.set_xlabel('Horizontal Distance (m)')
-    ax.set_ylabel('Height (m)')
-    ax.set_title(f'Projectile Motion (v₀ = {v0} m/s, θ = {theta}°)')
     
-    line, = ax.plot([], [], 'o-', lw=2)
-    trace, = ax.plot([], [], '-', lw=1, alpha=0.5)
+    # Initialize the pendulum components
+    line, = ax.plot([], [], 'k-', lw=2)  # pendulum rod
+    mass, = ax.plot([], [], 'bo', markersize=15)  # pendulum mass
+    time_text = ax.text(0.05, 0.95, '', transform=ax.transAxes)
     
     def init():
         line.set_data([], [])
-        trace.set_data([], [])
-        return line, trace
+        mass.set_data([], [])
+        time_text.set_text('')
+        return line, mass, time_text
     
-    def animate(i):
-        line.set_data([x[i]], [y[i]])
-        trace.set_data(x[:i+1], y[:i+1])
-        return line, trace
+    def update(frame):
+        i = frame
+        if i < len(t):
+            x = L * np.sin(theta[i])
+            y = -L * np.cos(theta[i])
+            
+            line.set_data([0, x], [0, y])
+            mass.set_data([x], [y])
+            time_text.set_text(f'Time: {t[i]:.2f} s')
+        
+        return line, mass, time_text
     
-    frames = len(x)
-    anim = FuncAnimation(fig, animate, frames=frames, 
-                         init_func=init, blit=True, interval=50)
-    plt.show()
+    # Create animation
+    num_frames = min(len(t), int(t[-1] * fps))
+    frame_indices = np.linspace(0, len(t)-1, num_frames, dtype=int)
     
-    return anim
-
-def compare_initial_velocities():
-    """Compare range vs. angle curves for different initial velocities."""
-    angles = np.linspace(0, 90, 91)
-    velocities = [10, 20, 30, 40]
+    anim = FuncAnimation(fig, update, frames=frame_indices, init_func=init, blit=True, interval=1000/fps)
     
-    plt.figure(figsize=(10, 6))
-    
-    for v0 in velocities:
-        ranges = [calculate_range(v0, theta) for theta in angles]
-        plt.plot(angles, ranges, label=f'v₀ = {v0} m/s')
-    
-    plt.grid(True)
-    plt.xlabel('Launch Angle (degrees)')
-    plt.ylabel('Range (m)')
-    plt.title('Range vs. Launch Angle for Different Initial Velocities')
-    plt.legend()
-    plt.show()
-
-def compare_initial_heights():
-    """Compare range vs. angle curves for different initial heights."""
-    angles = np.linspace(0, 90, 91)
-    heights = [0, 5, 10, 20]
-    
-    plt.figure(figsize=(10, 6))
-    
-    for h0 in heights:
-        ranges = [calculate_range(20, theta, h0) for theta in angles]
-        plt.plot(angles, ranges, label=f'h₀ = {h0} m')
-    
-    plt.grid(True)
-    plt.xlabel('Launch Angle (degrees)')
-    plt.ylabel('Range (m)')
-    plt.title('Range vs. Launch Angle for Different Initial Heights (v₀ = 20 m/s)')
-    plt.legend()
-    plt.show()
+    # Save animation
+    anim.save('pendulum_animation.mp4', writer='ffmpeg', fps=fps, dpi=200)
+    plt.close()
 
 # Example usage
 if __name__ == "__main__":
-    plot_trajectories(v0=20)
-    plot_range_vs_angle(v0=20)
-    compare_initial_velocities()
-    compare_initial_heights()
-    # To create an animation of a specific trajectory:
-    # anim = animate_trajectory(v0=20, theta=45)
+    # Parameters
+    g = 9.81  # acceleration due to gravity (m/s^2)
+    L = 1.0   # pendulum length (m)
+    b = 0.2   # damping coefficient
+    
+    # Time settings
+    t_max = 60  # maximum simulation time (s)
+    dt = 0.01   # time step (s)
+    t = np.arange(0, t_max, dt)
+    
+    # Initial conditions
+    y0 = [np.pi/4, 0]  # [theta_0, omega_0]
+    
+    # Simulation for various driving parameters
+    omega_values = [0.5, 1.0, 2.0, 3.0]  # driving frequencies (rad/s)
+    A = 1.0  # driving amplitude
+    
+    # Store results
+    theta_results = []
+    dtheta_results = []
+    poincare_theta = []
+    poincare_dtheta = []
+    
+    # Run simulations for different frequencies
+    for omega in omega_values:
+        t_sim, theta, dtheta = simulate_pendulum(t, y0, b, g, L, A, omega)
+        theta_results.append(theta)
+        dtheta_results.append(dtheta)
+        
+        # Create Poincaré section
+        theta_p, dtheta_p = create_poincare_section(t_sim, theta, dtheta, omega, 2*np.pi/omega)
+        poincare_theta.append(theta_p)
+        poincare_dtheta.append(dtheta_p)
+        
+        # Plot time series for the current frequency
+        plot_time_series(t_sim, theta, omega, f"Pendulum Motion (ω = {omega:.2f} rad/s)")
+    
+    # Plot phase portrait for all frequencies
+    plot_phase_portrait(theta_results, dtheta_results, "Phase Portrait for Different Driving Frequencies")
+    
+    # Plot Poincaré sections
+    plot_poincare_section(poincare_theta, poincare_dtheta, omega_values)
+    
+    # Create and plot bifurcation diagram
+    A_values = np.linspace(0.1, 2.0, 100)
+    omega_fixed = 2.0  # Fixed driving frequency for bifurcation analysis
+    A_vals, theta_vals = create_bifurcation_diagram(A_values, omega_fixed, b, g, L)
+    plot_bifurcation_diagram(A_vals, theta_vals)
+    
+    # Create animation for one specific case
+    animate_pendulum(t_sim, theta_results[2], L=L)
