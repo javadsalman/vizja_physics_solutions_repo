@@ -55,7 +55,7 @@ Using Kepler's Third Law, we can calculate Earth's mass:
 
 $M_{\text{Earth}} = \frac{4\pi^2 \times (3.844 \times 10^8 \text{ m})^3}{G \times (2.36 \times 10^6 \text{ s})^2}$
 
-With G = 6.67430 × 10^-11 m^3 kg^-1 s^-2, this gives us approximately 5.97 × 10^24 kg, which matches the accepted value for Earth's mass.
+With $G = 6.67430 \times 10^{-11} \text{ m}^3 \text{ kg}^{-1} \text{ s}^{-2}$, this gives us approximately $5.97 \times 10^{24} \text{ kg}$, which matches the accepted value for Earth's mass.
 
 ### Solar System
 
