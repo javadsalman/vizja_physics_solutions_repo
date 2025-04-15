@@ -15,11 +15,9 @@ The circle method is based on the ratio of areas between a unit circle and its b
 - Area of the circle: $A_{circle} = \pi r^2 = \pi$
 - Area of the square: $A_{square} = (2r)^2 = 4$
 
-The ratio of these areas is:
-$$\frac{A_{circle}}{A_{square}} = \frac{\pi}{4}$$
+The ratio of these areas is: $\frac{A_{circle}}{A_{square}} = \frac{\pi}{4}$
 
-Therefore, if we randomly generate points in the square, the probability that a point falls inside the circle is $\pi/4$. This leads to the estimation formula:
-$$\pi \approx 4 \cdot \frac{\text{points inside circle}}{\text{total points}}$$
+Therefore, if we randomly generate points in the square, the probability that a point falls inside the circle is $\pi/4$. This leads to the estimation formula: $\pi \approx 4 \cdot \frac{\text{points inside circle}}{\text{total points}}$
 
 ### Python Implementation
 
@@ -117,11 +115,11 @@ def run_circle_simulation(num_points_list):
 
 Buffon's Needle is a classic probability experiment where a needle of length $l$ is dropped onto a plane with parallel lines spaced $d$ units apart. The probability that the needle crosses a line is:
 
-$$P = \frac{2l}{\pi d}$$
+$P = \frac{2l}{\pi d}$
 
 If we drop the needle $n$ times and observe $c$ crossings, we can estimate π as:
 
-$$\pi \approx \frac{2l \cdot n}{d \cdot c}$$
+$\pi \approx \frac{2l \cdot n}{d \cdot c}$
 
 ### Python Implementation
 
