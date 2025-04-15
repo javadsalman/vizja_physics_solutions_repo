@@ -6,13 +6,13 @@
 <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <link href="../../../img/favicon.ico" rel="shortcut icon"/>
-<title>Problem 2 - Physics and Mathematics</title>
+<title>Problem 2: Estimating π using Monte Carlo Methods - Physics and Mathematics</title>
 <link href="../../../css/theme.css" rel="stylesheet"/>
 <link href="../../../css/theme_extra.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" rel="stylesheet"/>
 <script>
         // Current page data
-        var mkdocs_page_name = "Problem 2";
+        var mkdocs_page_name = "Problem 2: Estimating \u03c0 using Monte Carlo Methods";
         var mkdocs_page_input_path = "1 Physics/6 Statistics/Problem_2.md";
         var mkdocs_page_url = null;
       </script>
@@ -82,10 +82,38 @@
 </li>
 <li class="toctree-l1 current"><a class="reference internal current">6 Statistics</a>
 <ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../Problem_1/">Problem 1</a>
+<li class="toctree-l2"><a class="reference internal" href="../Problem_1/">Problem 1: Exploring the Central Limit Theorem through Simulations</a>
 </li>
-<li class="toctree-l2 current"><a class="reference internal current" href="#">Problem 2</a>
+<li class="toctree-l2 current"><a class="reference internal current" href="#">Problem 2: Estimating π using Monte Carlo Methods</a>
 <ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#part-1-estimating-using-a-circle">Part 1: Estimating π Using a Circle</a>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#theoretical-foundation">Theoretical Foundation</a>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#python-implementation">Python Implementation</a>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#results-and-analysis">Results and Analysis</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#part-2-estimating-using-buffons-needle">Part 2: Estimating π Using Buffon's Needle</a>
+<ul>
+<li class="toctree-l4"><a class="reference internal" href="#theoretical-foundation_1">Theoretical Foundation</a>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#python-implementation_1">Python Implementation</a>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#results-and-analysis_1">Results and Analysis</a>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#comparison-of-methods">Comparison of Methods</a>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#practical-applications">Practical Applications</a>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a>
+</li>
 </ul>
 </li>
 </ul>
@@ -129,7 +157,7 @@
 <li><a aria-label="Docs" class="icon icon-home" href="../../.."></a></li>
 <li class="breadcrumb-item">1 Physics</li>
 <li class="breadcrumb-item">6 Statistics</li>
-<li class="breadcrumb-item active">Problem 2</li>
+<li class="breadcrumb-item active">Problem 2: Estimating π using Monte Carlo Methods</li>
 <li class="wy-breadcrumbs-aside">
 </li>
 </ul>
@@ -137,11 +165,284 @@
 </div>
 <div class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
 <div class="section" itemprop="articleBody">
-<h1 id="problem-2">Problem 2</h1>
+<h1 id="problem-2-estimating-using-monte-carlo-methods">Problem 2: Estimating π using Monte Carlo Methods</h1>
+<h2 id="introduction">Introduction</h2>
+<p>Monte Carlo methods are powerful computational techniques that use randomness to solve problems or estimate values. In this problem, we explore two different approaches to estimate the value of π using Monte Carlo simulations:
+1. The circle method (geometric probability)
+2. Buffon's Needle method</p>
+<h2 id="part-1-estimating-using-a-circle">Part 1: Estimating π Using a Circle</h2>
+<h3 id="theoretical-foundation">Theoretical Foundation</h3>
+<p>The circle method is based on the ratio of areas between a unit circle and its bounding square. For a unit circle (radius = 1) inscribed in a square of side length 2:</p>
+<ul>
+<li>Area of the circle: <span class="arithmatex">\(A_{circle} = \pi r^2 = \pi\)</span></li>
+<li>Area of the square: <span class="arithmatex">\(A_{square} = (2r)^2 = 4\)</span></li>
+</ul>
+<p>The ratio of these areas is:
+<span class="arithmatex">\(<span class="arithmatex">\(\frac{A_{circle}}{A_{square}} = \frac{\pi}{4}\)</span>\)</span></p>
+<p>Therefore, if we randomly generate points in the square, the probability that a point falls inside the circle is <span class="arithmatex">\(\pi/4\)</span>. This leads to the estimation formula:
+<span class="arithmatex">\(<span class="arithmatex">\(\pi \approx 4 \cdot \frac{\text{points inside circle}}{\text{total points}}\)</span>\)</span></p>
+<h3 id="python-implementation">Python Implementation</h3>
+<pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+import os
+from tqdm import tqdm
+
+# Ensure the images directory exists
+img_dir = os.path.join("docs", "1 Physics", "6 Statistics", "images")
+os.makedirs(img_dir, exist_ok=True)
+
+class CirclePiEstimator:
+    """Estimator for π using the circle method"""
+
+    def __init__(self, num_points=10000):
+        """
+        Initialize the estimator.
+
+        Parameters:
+        - num_points: number of random points to generate
+        """
+        self.num_points = num_points
+        self.points = np.random.uniform(-1, 1, (num_points, 2))
+        self.inside = np.sum(self.points[:, 0]**2 + self.points[:, 1]**2 &lt;= 1)
+        self.pi_estimate = 4 * self.inside / num_points
+
+    def plot_points(self, filename=None):
+        """Plot the random points and circle"""
+        plt.figure(figsize=(8, 8))
+
+        # Plot points
+        inside = self.points[:, 0]**2 + self.points[:, 1]**2 &lt;= 1
+        plt.scatter(self.points[inside, 0], self.points[inside, 1], 
+                   c='blue', alpha=0.5, label='Inside circle')
+        plt.scatter(self.points[~inside, 0], self.points[~inside, 1], 
+                   c='red', alpha=0.5, label='Outside circle')
+
+        # Plot circle
+        theta = np.linspace(0, 2*np.pi, 100)
+        plt.plot(np.cos(theta), np.sin(theta), 'k-', linewidth=2)
+
+        # Plot square
+        plt.plot([-1, 1, 1, -1, -1], [-1, -1, 1, 1, -1], 'k-', linewidth=2)
+
+        plt.title(f'π Estimation: {self.pi_estimate:.6f} (n={self.num_points})')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.axis('equal')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+
+        if filename:
+            save_path = os.path.join(img_dir, filename)
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return save_path
+
+        return plt.gcf()
+
+def run_circle_simulation(num_points_list):
+    """Run simulation for different numbers of points"""
+    results = []
+    for n in tqdm(num_points_list, desc="Running circle simulation"):
+        estimator = CirclePiEstimator(n)
+        results.append({
+            'n': n,
+            'pi_estimate': estimator.pi_estimate,
+            'error': abs(estimator.pi_estimate - np.pi)
+        })
+        if n in [100, 1000, 10000, 100000]:
+            estimator.plot_points(f'circle_pi_n{n}.png')
+    return results
+</code></pre>
+<h3 id="results-and-analysis">Results and Analysis</h3>
+<p><img alt="Circle Method - n=100" src="../images/circle_pi_n100.png"/></p>
+<p><em>Figure 1: π estimation with 100 points</em></p>
+<p><img alt="Circle Method - n=10000" src="../images/circle_pi_n10000.png"/></p>
+<p><em>Figure 2: π estimation with 10,000 points</em></p>
+<p><strong>Key Observations:</strong>
+- The estimate improves as the number of points increases
+- The error decreases approximately as <span class="arithmatex">\(1/\sqrt{n}\)</span> (standard Monte Carlo convergence)
+- The method is simple to implement but requires many points for high precision</p>
+<h2 id="part-2-estimating-using-buffons-needle">Part 2: Estimating π Using Buffon's Needle</h2>
+<h3 id="theoretical-foundation_1">Theoretical Foundation</h3>
+<p>Buffon's Needle is a classic probability experiment where a needle of length <span class="arithmatex">\(l\)</span> is dropped onto a plane with parallel lines spaced <span class="arithmatex">\(d\)</span> units apart. The probability that the needle crosses a line is:</p>
+<div class="arithmatex">\[P = \frac{2l}{\pi d}\]</div>
+<p>If we drop the needle <span class="arithmatex">\(n\)</span> times and observe <span class="arithmatex">\(c\)</span> crossings, we can estimate π as:</p>
+<div class="arithmatex">\[\pi \approx \frac{2l \cdot n}{d \cdot c}\]</div>
+<h3 id="python-implementation_1">Python Implementation</h3>
+<pre><code class="language-python">class BuffonNeedle:
+    """Estimator for π using Buffon's Needle method"""
+
+    def __init__(self, needle_length=1, line_spacing=2, num_throws=10000):
+        """
+        Initialize the estimator.
+
+        Parameters:
+        - needle_length: length of the needle
+        - line_spacing: distance between parallel lines
+        - num_throws: number of needle throws
+        """
+        self.needle_length = needle_length
+        self.line_spacing = line_spacing
+        self.num_throws = num_throws
+
+        # Generate random needle positions
+        self.x = np.random.uniform(0, line_spacing, num_throws)
+        self.theta = np.random.uniform(0, np.pi, num_throws)
+
+        # Calculate crossings
+        self.crossings = self.x + 0.5 * needle_length * np.sin(self.theta) &gt; line_spacing
+        self.crossings += self.x - 0.5 * needle_length * np.sin(self.theta) &lt; 0
+
+        self.pi_estimate = (2 * needle_length * num_throws) / (line_spacing * np.sum(self.crossings))
+
+    def plot_needles(self, max_needles=100, filename=None):
+        """Plot the needle positions"""
+        plt.figure(figsize=(10, 6))
+
+        # Plot lines
+        for i in range(0, int(self.line_spacing * 2) + 1):
+            plt.axhline(y=i, color='k', linestyle='-', alpha=0.5)
+
+        # Plot needles
+        n = min(max_needles, self.num_throws)
+        for i in range(n):
+            x1 = self.x[i] - 0.5 * self.needle_length * np.cos(self.theta[i])
+            x2 = self.x[i] + 0.5 * self.needle_length * np.cos(self.theta[i])
+            y1 = i % self.line_spacing
+            y2 = y1 + self.needle_length * np.sin(self.theta[i])
+
+            color = 'red' if self.crossings[i] else 'blue'
+            plt.plot([x1, x2], [y1, y2], color=color, alpha=0.5)
+
+        plt.title(f'Buffon\'s Needle: π ≈ {self.pi_estimate:.6f} (n={self.num_throws})')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.grid(True, alpha=0.3)
+
+        if filename:
+            save_path = os.path.join(img_dir, filename)
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return save_path
+
+        return plt.gcf()
+
+def run_buffon_simulation(num_throws_list):
+    """Run simulation for different numbers of throws"""
+    results = []
+    for n in tqdm(num_throws_list, desc="Running Buffon's Needle simulation"):
+        estimator = BuffonNeedle(num_throws=n)
+        results.append({
+            'n': n,
+            'pi_estimate': estimator.pi_estimate,
+            'error': abs(estimator.pi_estimate - np.pi)
+        })
+        if n in [100, 1000, 10000, 100000]:
+            estimator.plot_needles(filename=f'buffon_pi_n{n}.png')
+    return results
+</code></pre>
+<h3 id="results-and-analysis_1">Results and Analysis</h3>
+<p><img alt="Buffon's Needle - n=100" src="../images/buffon_pi_n100.png"/></p>
+<p><em>Figure 3: Buffon's Needle with 100 throws</em></p>
+<p><img alt="Buffon's Needle - n=10000" src="../images/buffon_pi_n10000.png"/></p>
+<p><em>Figure 4: Buffon's Needle with 10,000 throws</em></p>
+<p><strong>Key Observations:</strong>
+- The estimate improves with more needle throws
+- The convergence rate is similar to the circle method
+- The method is more complex to implement but has historical significance</p>
+<h2 id="comparison-of-methods">Comparison of Methods</h2>
+<p>Let's compare both methods in terms of accuracy and computational efficiency:</p>
+<pre><code class="language-python">def compare_methods():
+    """Compare both methods"""
+    num_points = [100, 1000, 10000, 100000, 1000000]
+
+    # Run both simulations
+    circle_results = run_circle_simulation(num_points)
+    buffon_results = run_buffon_simulation(num_points)
+
+    # Plot comparison
+    plt.figure(figsize=(10, 6))
+    plt.plot([r['n'] for r in circle_results], 
+             [r['error'] for r in circle_results], 
+             'b-', label='Circle Method')
+    plt.plot([r['n'] for r in buffon_results], 
+             [r['error'] for r in buffon_results], 
+             'r-', label='Buffon\'s Needle')
+
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Number of points/throws')
+    plt.ylabel('Absolute error')
+    plt.title('Comparison of π Estimation Methods')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+
+    save_path = os.path.join(img_dir, 'pi_estimation_comparison.png')
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    return circle_results, buffon_results
+</code></pre>
+<p><img alt="Comparison of Methods" src="../images/pi_estimation_comparison.png"/></p>
+<p><em>Figure 5: Comparison of both methods</em></p>
+<h2 id="practical-applications">Practical Applications</h2>
+<p>Monte Carlo methods have numerous applications beyond π estimation:</p>
+<ol>
+<li><strong>Physics:</strong></li>
+<li>Particle transport simulations</li>
+<li>Quantum mechanics calculations</li>
+<li>
+<p>Statistical mechanics</p>
+</li>
+<li>
+<p><strong>Finance:</strong></p>
+</li>
+<li>Option pricing</li>
+<li>Risk assessment</li>
+<li>
+<p>Portfolio optimization</p>
+</li>
+<li>
+<p><strong>Computer Science:</strong></p>
+</li>
+<li>Randomized algorithms</li>
+<li>Probabilistic data structures</li>
+<li>
+<p>Machine learning</p>
+</li>
+<li>
+<p><strong>Engineering:</strong></p>
+</li>
+<li>Reliability analysis</li>
+<li>Quality control</li>
+<li>System simulation</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p>Both Monte Carlo methods provide interesting ways to estimate π, each with its own advantages:</p>
+<ol>
+<li><strong>Circle Method:</strong></li>
+<li>Simpler to implement</li>
+<li>More intuitive</li>
+<li>
+<p>Better for visualization</p>
+</li>
+<li>
+<p><strong>Buffon's Needle:</strong></p>
+</li>
+<li>Historical significance</li>
+<li>Demonstrates geometric probability</li>
+<li>More complex but equally effective</li>
+</ol>
+<p>The key insights from this study are:
+- Monte Carlo methods can provide good estimates with sufficient samples
+- The error decreases as <span class="arithmatex">\(1/\sqrt{n}\)</span> for both methods
+- Visualization helps understand the convergence process
+- Both methods demonstrate the power of random sampling in numerical computation</p>
+<p>These methods serve as excellent introductions to Monte Carlo techniques and their applications in various fields of science and engineering.</p>
 </div>
 </div><footer>
 <div aria-label="Footer Navigation" class="rst-footer-buttons" role="navigation">
-<a class="btn btn-neutral float-left" href="../Problem_1/" title="Problem 1"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+<a class="btn btn-neutral float-left" href="../Problem_1/" title="Problem 1: Exploring the Central Limit Theorem through Simulations"><span class="icon icon-circle-arrow-left"></span> Previous</a>
 <a class="btn btn-neutral float-right" href="../../7%20Measurements/Problem_1/" title="Problem 1">Next <span class="icon icon-circle-arrow-right"></span></a>
 </div>
 <hr/>
