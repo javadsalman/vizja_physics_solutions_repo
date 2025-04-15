@@ -1,29 +1,3 @@
-# Problem 2: Estimating π using Monte Carlo Methods
-
-## Introduction
-
-Monte Carlo methods are powerful computational techniques that use randomness to solve problems or estimate values. In this problem, we explore two different approaches to estimate the value of π using Monte Carlo simulations:
-1. The circle method (geometric probability)
-2. Buffon's Needle method
-
-## Part 1: Estimating π Using a Circle
-
-### Theoretical Foundation
-
-The circle method is based on the ratio of areas between a unit circle and its bounding square. For a unit circle (radius = 1) inscribed in a square of side length 2:
-
-- Area of the circle: $A_{circle} = \pi r^2 = \pi$
-- Area of the square: $A_{square} = (2r)^2 = 4$
-
-The ratio of these areas is:
-$$\frac{A_{circle}}{A_{square}} = \frac{\pi}{4}$$
-
-Therefore, if we randomly generate points in the square, the probability that a point falls inside the circle is $\pi/4$. This leads to the estimation formula:
-$$\pi \approx 4 \cdot \frac{\text{points inside circle}}{\text{total points}}$$
-
-### Python Implementation
-
-```python
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -81,51 +55,6 @@ class CirclePiEstimator:
         
         return plt.gcf()
 
-def run_circle_simulation(num_points_list):
-    """Run simulation for different numbers of points"""
-    results = []
-    for n in tqdm(num_points_list, desc="Running circle simulation"):
-        estimator = CirclePiEstimator(n)
-        results.append({
-            'n': n,
-            'pi_estimate': estimator.pi_estimate,
-            'error': abs(estimator.pi_estimate - np.pi)
-        })
-        if n in [100, 1000, 10000, 100000]:
-            estimator.plot_points(f'circle_pi_n{n}.png')
-    return results
-```
-
-### Results and Analysis
-
-![Circle Method - n=100](./images/circle_pi_n100.png)
-
-*Figure 1: π estimation with 100 points*
-
-![Circle Method - n=10000](./images/circle_pi_n10000.png)
-
-*Figure 2: π estimation with 10,000 points*
-
-**Key Observations:**
-- The estimate improves as the number of points increases
-- The error decreases approximately as $1/\sqrt{n}$ (standard Monte Carlo convergence)
-- The method is simple to implement but requires many points for high precision
-
-## Part 2: Estimating π Using Buffon's Needle
-
-### Theoretical Foundation
-
-Buffon's Needle is a classic probability experiment where a needle of length $l$ is dropped onto a plane with parallel lines spaced $d$ units apart. The probability that the needle crosses a line is:
-
-$$P = \frac{2l}{\pi d}$$
-
-If we drop the needle $n$ times and observe $c$ crossings, we can estimate π as:
-
-$$\pi \approx \frac{2l \cdot n}{d \cdot c}$$
-
-### Python Implementation
-
-```python
 class BuffonNeedle:
     """Estimator for π using Buffon's Needle method"""
     
@@ -184,6 +113,20 @@ class BuffonNeedle:
         
         return plt.gcf()
 
+def run_circle_simulation(num_points_list):
+    """Run simulation for different numbers of points"""
+    results = []
+    for n in tqdm(num_points_list, desc="Running circle simulation"):
+        estimator = CirclePiEstimator(n)
+        results.append({
+            'n': n,
+            'pi_estimate': estimator.pi_estimate,
+            'error': abs(estimator.pi_estimate - np.pi)
+        })
+        if n in [100, 1000, 10000, 100000]:
+            estimator.plot_points(f'circle_pi_n{n}.png')
+    return results
+
 def run_buffon_simulation(num_throws_list):
     """Run simulation for different numbers of throws"""
     results = []
@@ -197,28 +140,7 @@ def run_buffon_simulation(num_throws_list):
         if n in [100, 1000, 10000, 100000]:
             estimator.plot_needles(filename=f'buffon_pi_n{n}.png')
     return results
-```
 
-### Results and Analysis
-
-![Buffon's Needle - n=100](./images/buffon_pi_n100.png)
-
-*Figure 3: Buffon's Needle with 100 throws*
-
-![Buffon's Needle - n=10000](./images/buffon_pi_n10000.png)
-
-*Figure 4: Buffon's Needle with 10,000 throws*
-
-**Key Observations:**
-- The estimate improves with more needle throws
-- The convergence rate is similar to the circle method
-- The method is more complex to implement but has historical significance
-
-## Comparison of Methods
-
-Let's compare both methods in terms of accuracy and computational efficiency:
-
-```python
 def compare_methods():
     """Compare both methods"""
     num_points = [100, 1000, 10000, 100000, 1000000]
@@ -249,54 +171,18 @@ def compare_methods():
     plt.close()
     
     return circle_results, buffon_results
-```
 
-![Comparison of Methods](./images/pi_estimation_comparison.png)
-
-*Figure 5: Comparison of both methods*
-
-## Practical Applications
-
-Monte Carlo methods have numerous applications beyond π estimation:
-
-1. **Physics:**
-   - Particle transport simulations
-   - Quantum mechanics calculations
-   - Statistical mechanics
-
-2. **Finance:**
-   - Option pricing
-   - Risk assessment
-   - Portfolio optimization
-
-3. **Computer Science:**
-   - Randomized algorithms
-   - Probabilistic data structures
-   - Machine learning
-
-4. **Engineering:**
-   - Reliability analysis
-   - Quality control
-   - System simulation
-
-## Conclusion
-
-Both Monte Carlo methods provide interesting ways to estimate π, each with its own advantages:
-
-1. **Circle Method:**
-   - Simpler to implement
-   - More intuitive
-   - Better for visualization
-
-2. **Buffon's Needle:**
-   - Historical significance
-   - Demonstrates geometric probability
-   - More complex but equally effective
-
-The key insights from this study are:
-- Monte Carlo methods can provide good estimates with sufficient samples
-- The error decreases as $1/\sqrt{n}$ for both methods
-- Visualization helps understand the convergence process
-- Both methods demonstrate the power of random sampling in numerical computation
-
-These methods serve as excellent introductions to Monte Carlo techniques and their applications in various fields of science and engineering.
+if __name__ == "__main__":
+    print("Running π estimation simulations...")
+    circle_results, buffon_results = compare_methods()
+    print("\nSimulation complete! Images saved to:", img_dir)
+    
+    # Print final results
+    print("\nFinal Results:")
+    print("Circle Method:")
+    for r in circle_results:
+        print(f"n={r['n']}: π ≈ {r['pi_estimate']:.6f} (error: {r['error']:.6f})")
+    
+    print("\nBuffon's Needle:")
+    for r in buffon_results:
+        print(f"n={r['n']}: π ≈ {r['pi_estimate']:.6f} (error: {r['error']:.6f})") 
